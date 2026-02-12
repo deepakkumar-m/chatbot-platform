@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Platform Engineering Chatbot</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <svg class="logo-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M12 2L2 7L12 12L22 7L12 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 17L12 22L22 17" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                        <path d="M2 12L12 17L22 12" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                    </svg>
+                    <h1>Platform Engineering Assistant</h1>
+                </div>
+                <div class="stats" id="stats">
+                    <div class="stat-item">
+                        <span class="stat-value" id="serverCount">-</span>
+                        <span class="stat-label">Servers</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="appCount">-</span>
+                        <span class="stat-label">Apps</span>
+                    </div>
+                    <div class="stat-item">
+                        <span class="stat-value" id="recordCount">-</span>
+                        <span class="stat-label">Records</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Chat Container -->
+            <div class="chat-container">
+                <div class="chat-messages" id="chatMessages">
+                    <!-- Welcome Message -->
+                    <div class="message bot-message">
+                        <div class="message-avatar">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+                                <path d="M8 14C8 14 9.5 16 12 16C14.5 16 16 14 16 14" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+                                <circle cx="9" cy="9" r="1" fill="currentColor"/>
+                                <circle cx="15" cy="9" r="1" fill="currentColor"/>
+                            </svg>
+                        </div>
+                        <div class="message-content">
+                            <div class="message-text">
+                                👋 Hi! I'm your Platform Engineering Assistant. I can help you find information about servers and applications in your RKE2 environment.
+                                <br><br>
+                                <strong>Try asking:</strong>
+                                <ul>
+                                    <li>"Show me server node-01"</li>
+                                    <li>"What's running on prod-server-1?"</li>
+                                    <li>"Where is nginx running?"</li>
+                                    <li>"Find application redis"</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Area -->
+                <div class="chat-input-container">
+                    <form class="chat-input-form" id="chatForm">
+                        <input 
+                            type="text" 
+                            class="chat-input" 
+                            id="chatInput" 
+                            placeholder="Ask about servers or applications..."
+                            autocomplete="off"
+                        />
+                        <button type="submit" class="send-button" id="sendButton">
+                            <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                                <path d="M22 2L15 22L11 13L2 9L22 2Z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                            </svg>
+                        </button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Help Panel -->
+            <aside class="help-panel">
+                <h3>Quick Guide</h3>
+                <div class="help-section">
+                    <h4>🔍 Search by Server</h4>
+                    <p>Find all applications running on a specific server</p>
+                    <code>show me server-name</code>
+                </div>
+                <div class="help-section">
+                    <h4>📱 Search by Application</h4>
+                    <p>Find all servers running a specific application</p>
+                    <code>where is app-name running</code>
+                </div>
+                <div class="help-section">
+                    <h4>🌐 General Search</h4>
+                    <p>Search across all fields</p>
+                    <code>find production</code>
+                </div>
+                <div class="help-section">
+                    <h4>📊 Data Management</h4>
+                    <p>Edit the Excel file at:</p>
+                    <code>data/servers.xlsx</code>
+                    <p class="note">Reload the page after making changes</p>
+                </div>
+            </aside>
+        </main>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/chat.js') }}"></script>
+</body>
+</html>
