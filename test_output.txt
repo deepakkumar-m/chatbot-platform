@@ -1,0 +1,19 @@
+.F.
+======================================================================
+FAIL: test_search_app_includes_run_as (__main__.TestChatbotApp)
+Test search by app includes 'Run As' info
+----------------------------------------------------------------------
+Traceback (most recent call last):
+  File "/Users/deepak/chatbot inv/test_app.py", line 122, in test_search_app_includes_run_as
+    self.assertIn(f"Run As: {self.test_run_as}", data['message'])
+AssertionError: 'Run As: TestUser' not found in "I couldn't find any information about 'testapp_runas'. Please check the spelling or try a different query."
+
+----------------------------------------------------------------------
+Ran 3 tests in 0.039s
+
+FAILED (failures=1)
+DEBUG: All data in Excel:
+{'Server/Node Name': 'lvappi05169', 'Application Name': 'aml-tech-ist', 'Environment': 'Non prod', 'Port': None, 'Status': 'Master', 'Run As': None, 'Notes': None}
+{'Server/Node Name': 'TestServer_RunAs', 'Application Name': 'TestApp_RunAs', 'Environment': 'Test', 'Port': '8080', 'Status': 'Active', 'Run As': 'TestUser', 'Notes': 'Test Note'}
+DEBUG: Response data: {'count': 0, 'message': "I couldn't find any information about 'testapp_runas'. Please check the spelling or try a different query.", 'results': []}
+Chat response: b'{"count":1,"message":"Found 1 application(s) running on server \'testserver_runas\': TestApp_RunAs (Run As: TestUser)","results":[{"Application Name":"TestApp_RunAs","Environment":"Test","Notes":"Test Note","Port":"8080","Run As":"TestUser","Server/Node Name":"TestServer_RunAs","Status":"Active"}]}\n'

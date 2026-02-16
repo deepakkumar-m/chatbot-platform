@@ -1,42 +1,47 @@
 /* ==================== CSS Variables ==================== */
 :root {
-    /* Colors */
-    --primary: #6366f1;
-    --primary-dark: #4f46e5;
-    --primary-light: #818cf8;
-    --secondary: #ec4899;
+    /* Scotiabank Colors */
+    --scotiabank-red: #EE3124;
+    --scotiabank-red-dark: #C41E3A;
+    --scotiabank-red-light: #FF6B5D;
+
+    /* Primary Colors */
+    --primary: #EE3124;
+    --primary-dark: #C41E3A;
+    --primary-light: #FF6B5D;
+    --secondary: #00A3E0;
     --accent: #14b8a6;
     --success: #10b981;
     --warning: #f59e0b;
     --error: #ef4444;
-    
+
     /* Background */
     --bg-dark: #0f172a;
     --bg-darker: #020617;
     --bg-card: rgba(30, 41, 59, 0.8);
     --bg-glass: rgba(51, 65, 85, 0.4);
-    
+
     /* Text */
     --text-primary: #f1f5f9;
     --text-secondary: #cbd5e1;
     --text-muted: #94a3b8;
-    
+
     /* Borders */
     --border-color: rgba(148, 163, 184, 0.2);
-    
+
     /* Shadows */
     --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
     --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
     --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
-    --shadow-glow: 0 0 20px rgba(99, 102, 241, 0.3);
-    
+    --shadow-glow: 0 0 20px rgba(238, 49, 36, 0.3);
+
     /* Spacing */
     --spacing-xs: 0.5rem;
     --spacing-sm: 0.75rem;
     --spacing-md: 1rem;
     --spacing-lg: 1.5rem;
     --spacing-xl: 2rem;
-    
+
     /* Border Radius */
     --radius-sm: 0.5rem;
     --radius-md: 0.75rem;
@@ -53,7 +58,7 @@
 
 body {
     font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    background: linear-gradient(135deg, var(--bg-darker) 0%, #1e1b4b 100%);
+    background: linear-gradient(135deg, #A8D5E2 0%, #E8B4D9 50%, #FFD6E0 100%);
     color: var(--text-primary);
     min-height: 100vh;
     overflow-x: hidden;
@@ -67,10 +72,10 @@ body::before {
     left: 0;
     width: 100%;
     height: 100%;
-    background: 
-        radial-gradient(circle at 20% 50%, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 80% 80%, rgba(236, 72, 153, 0.1) 0%, transparent 50%),
-        radial-gradient(circle at 40% 20%, rgba(20, 184, 166, 0.1) 0%, transparent 50%);
+    background:
+        radial-gradient(circle at 20% 50%, rgba(238, 49, 36, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 80% 80%, rgba(0, 163, 224, 0.05) 0%, transparent 50%),
+        radial-gradient(circle at 40% 20%, rgba(20, 184, 166, 0.05) 0%, transparent 50%);
     pointer-events: none;
     z-index: 0;
 }
@@ -118,10 +123,14 @@ body::before {
 .logo h1 {
     font-size: 1.75rem;
     font-weight: 700;
-    background: linear-gradient(135deg, var(--primary-light) 0%, var(--secondary) 100%);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
+}
+
+.logo h1 .text-red {
+    color: var(--scotiabank-red);
+}
+
+.logo h1 .text-white {
+    color: #ffffff;
 }
 
 /* Stats */
@@ -219,6 +228,7 @@ body::before {
         opacity: 0;
         transform: translateY(10px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);
@@ -388,10 +398,14 @@ body::before {
 }
 
 @keyframes pulse {
-    0%, 60%, 100% {
+
+    0%,
+    60%,
+    100% {
         transform: scale(0.8);
         opacity: 0.5;
     }
+
     30% {
         transform: scale(1.2);
         opacity: 1;
@@ -535,7 +549,7 @@ body::before {
     .main-content {
         grid-template-columns: 1fr;
     }
-    
+
     .help-panel {
         display: none;
     }
@@ -545,29 +559,29 @@ body::before {
     .container {
         padding: var(--spacing-sm);
     }
-    
+
     .header-content {
         flex-direction: column;
         text-align: center;
     }
-    
+
     .logo {
         justify-content: center;
     }
-    
+
     .stats {
         width: 100%;
         justify-content: space-around;
     }
-    
+
     .chat-container {
         height: calc(100vh - 250px);
     }
-    
+
     .message-content {
         max-width: 90%;
     }
-    
+
     .results-grid {
         grid-template-columns: 1fr;
     }
@@ -577,11 +591,11 @@ body::before {
     .logo h1 {
         font-size: 1.25rem;
     }
-    
+
     .stat-value {
         font-size: 1.25rem;
     }
-    
+
     .stat-label {
         font-size: 0.65rem;
     }

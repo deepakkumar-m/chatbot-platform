@@ -66,11 +66,11 @@ def format_response(results, intent, keyword):
     count = len(results)
     
     if intent == 'search_server':
-        apps = [r.get('Application Name', 'N/A') for r in results]
-        message = f"Found {count} application(s) running on server '{keyword}':"
+        clusters = [r.get('Cluster Name', 'N/A') for r in results]
+        message = f"Found {count} cluster(s) running on server '{keyword}':"
     elif intent == 'search_application':
         servers = [r.get('Server/Node Name', 'N/A') for r in results]
-        message = f"Application '{keyword}' is running on {count} server(s):"
+        message = f"Cluster '{keyword}' is running on {count} server(s):"
     else:
         message = f"Found {count} matching record(s) for '{keyword}':"
     
@@ -144,8 +144,7 @@ def add_record():
         server_name = data.get('server_name', '')
         application = data.get('application', '')
         environment = data.get('environment', '')
-        port = data.get('port', '')
-        status = data.get('status', 'Active')
+        run_as = data.get('run_as', '')
         notes = data.get('notes', '')
         
         if not server_name or not application:
@@ -154,7 +153,7 @@ def add_record():
             }), 400
         
         success = excel_manager.add_record(
-            server_name, application, environment, port, status, notes
+            server_name, application, environment, run_as, notes
         )
         
         if success:

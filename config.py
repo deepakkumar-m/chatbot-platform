@@ -18,9 +18,8 @@ PORT = 5001
 # Column names in Excel sheet
 COLUMNS = {
     'SERVER_NAME': 'Server/Node Name',
-    'APPLICATION': 'Application Name',
+    'APPLICATION': 'Cluster Name',
     'ENVIRONMENT': 'Environment',
-    'PORT': 'Port',
-    'STATUS': 'Status',
+    'RUN_AS': 'Run as',
     'NOTES': 'Notes'
 }

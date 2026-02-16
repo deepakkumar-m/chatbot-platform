@@ -33,12 +33,11 @@ class ExcelDataManager:
                 cell.font = Font(bold=True, size=12, color="FFFFFF")
             
             # Adjust column widths
-            ws.column_dimensions['A'].width = 20
-            ws.column_dimensions['B'].width = 25
-            ws.column_dimensions['C'].width = 15
-            ws.column_dimensions['D'].width = 10
-            ws.column_dimensions['E'].width = 12
-            ws.column_dimensions['F'].width = 30
+            ws.column_dimensions['A'].width = 20  # Server/Node Name
+            ws.column_dimensions['B'].width = 25  # Application Name
+            ws.column_dimensions['C'].width = 15  # Environment
+            ws.column_dimensions['D'].width = 20  # Run as
+            ws.column_dimensions['E'].width = 30  # Notes
             
             wb.save(self.file_path)
     
@@ -104,13 +103,13 @@ class ExcelDataManager:
         
         return results
     
-    def add_record(self, server_name, application, environment="", port="", status="Active", notes=""):
+    def add_record(self, server_name, application, environment="", run_as="", notes=""):
         """Add a new server/application record"""
         try:
             wb = openpyxl.load_workbook(self.file_path)
             ws = wb[self.sheet_name]
             
-            new_row = [server_name, application, environment, port, status, notes]
+            new_row = [server_name, application, environment, run_as, notes]
             ws.append(new_row)
             
             wb.save(self.file_path)

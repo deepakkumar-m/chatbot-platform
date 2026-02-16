@@ -9,8 +9,7 @@ const sendButton = document.getElementById('sendButton');
 const chatMessages = document.getElementById('chatMessages');
 const statsElements = {
     servers: document.getElementById('serverCount'),
-    apps: document.getElementById('appCount'),
-    records: document.getElementById('recordCount')
+    apps: document.getElementById('appCount')
 };
 
 // State
@@ -35,24 +34,24 @@ chatInput.addEventListener('input', () => {
 // ==================== Core Functions ====================
 async function handleUserMessage() {
     const message = chatInput.value.trim();
-    
+
     if (!message || isProcessing) {
         return;
     }
-    
+
     // Add user message to chat
     addUserMessage(message);
-    
+
     // Clear input
     chatInput.value = '';
     sendButton.disabled = true;
-    
+
     // Show typing indicator
     const typingId = showTypingIndicator();
-    
+
     // Process message
     isProcessing = true;
-    
+
     try {
         const response = await fetch('/api/chat', {
             method: 'POST',
@@ -61,12 +60,12 @@ async function handleUserMessage() {
             },
             body: JSON.stringify({ message })
         });
-        
+
         const data = await response.json();
-        
+
         // Remove typing indicator
         removeTypingIndicator(typingId);
-        
+
         if (response.ok) {
             addBotMessage(data);
         } else {
@@ -99,14 +98,14 @@ function addUserMessage(text) {
 function addBotMessage(data) {
     const messageDiv = document.createElement('div');
     messageDiv.className = 'message bot-message';
-    
+
     let content = `<div class="message-text">${escapeHtml(data.message)}</div>`;
-    
+
     // Add results if available
     if (data.results && data.results.length > 0) {
         content += renderResults(data.results);
     }
-    
+
     messageDiv.innerHTML = `
         <div class="message-avatar">
             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -120,7 +119,7 @@ function addBotMessage(data) {
             ${content}
         </div>
     `;
-    
+
     chatMessages.appendChild(messageDiv);
     scrollToBottom();
 }
@@ -142,35 +141,32 @@ function addErrorMessage(text) {
 
 function renderResults(results) {
     let html = '<div class="results-grid">';
-    
+
     results.forEach(result => {
         const serverName = result['Server/Node Name'] || 'N/A';
-        const appName = result['Application Name'] || 'N/A';
+        const clusterName = result['Cluster Name'] || 'N/A';
         const environment = result['Environment'] || 'N/A';
-        const port = result['Port'] || 'N/A';
-        const status = result['Status'] || 'Active';
+
+        const runAs = result['Run as'] || 'N/A';
+
         const notes = result['Notes'] || '-';
-        
-        const statusClass = status.toLowerCase() === 'active' ? 'badge-active' : 'badge-inactive';
-        
+
+
+
         html += `
             <div class="result-card">
                 <div class="result-card-header">
                     <div class="result-card-title">${escapeHtml(serverName)}</div>
-                    <span class="result-card-badge ${statusClass}">${escapeHtml(status)}</span>
+                    ${runAs !== 'N/A' ? `<span class="result-card-badge badge-active">${escapeHtml(runAs)}</span>` : ''}
                 </div>
                 <div class="result-card-body">
                     <div class="result-card-row">
-                        <span class="result-card-label">Application:</span>
-                        <span class="result-card-value">${escapeHtml(appName)}</span>
+                        <span class="result-card-label">Cluster:</span>
+                        <span class="result-card-value">${escapeHtml(clusterName)}</span>
                     </div>
                     <div class="result-card-row">
                         <span class="result-card-label">Environment:</span>
                         <span class="result-card-value">${escapeHtml(environment)}</span>
-                    </div>
-                    <div class="result-card-row">
-                        <span class="result-card-label">Port:</span>
-                        <span class="result-card-value">${escapeHtml(String(port))}</span>
                     </div>
                     ${notes !== '-' ? `
                         <div class="result-card-row" style="margin-top: 0.5rem; flex-direction: column; align-items: flex-start;">
@@ -182,7 +178,7 @@ function renderResults(results) {
             </div>
         `;
     });
-    
+
     html += '</div>';
     return html;
 }
@@ -229,17 +225,15 @@ async function loadStatistics() {
     try {
         const response = await fetch('/api/stats');
         const data = await response.json();
-        
+
         if (response.ok) {
             statsElements.servers.textContent = data.unique_servers || 0;
             statsElements.apps.textContent = data.unique_applications || 0;
-            statsElements.records.textContent = data.total_records || 0;
         }
     } catch (error) {
         console.error('Error loading statistics:', error);
         statsElements.servers.textContent = '?';
         statsElements.apps.textContent = '?';
-        statsElements.records.textContent = '?';
     }
 }
 
@@ -261,7 +255,7 @@ document.addEventListener('keydown', (e) => {
         e.preventDefault();
         chatInput.focus();
     }
-    
+
     // Clear chat on Ctrl/Cmd + K
     if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
