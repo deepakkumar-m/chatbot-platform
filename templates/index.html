@@ -5,6 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GBME Platform Assistant</title>
+    <meta name="description" content="GBME Platform Assistant – real-time Rancher cluster monitoring chatbot">
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -23,12 +24,12 @@
                 </div>
                 <div class="stats" id="stats">
                     <div class="stat-item">
-                        <span class="stat-value" id="serverCount">-</span>
-                        <span class="stat-label">Servers</span>
+                        <span class="stat-value" id="clusterCount">-</span>
+                        <span class="stat-label">Clusters</span>
                     </div>
                     <div class="stat-item">
-                        <span class="stat-value" id="appCount">-</span>
-                        <span class="stat-label">Clusters</span>
+                        <span class="stat-value" id="nodeCount">-</span>
+                        <span class="stat-label">Nodes</span>
                     </div>
                 </div>
             </div>
@@ -52,15 +53,16 @@
                         </div>
                         <div class="message-content">
                             <div class="message-text">
-                                👋 Hi! I'm your Platform Engineering Assistant. I can help you find information about
-                                servers and applications in your RKE2 environment.
+                                👋 Hi! I'm your <strong>GBME Platform Assistant</strong>. I connect to Rancher to give
+                                you real-time cluster health, node status, and resource usage.
                                 <br><br>
                                 <strong>Try asking:</strong>
                                 <ul>
-                                    <li>"Show me server node-01"</li>
-                                    <li>"What's running on prod-server-1?"</li>
-                                    <li>"Where is nginx running?"</li>
-                                    <li>"Find application redis"</li>
+                                    <li>"List all clusters"</li>
+                                    <li>"Show cluster prod-rke2"</li>
+                                    <li>"Status of cluster dev"</li>
+                                    <li>"Node status"</li>
+                                    <li>"CPU usage for staging"</li>
                                 </ul>
                             </div>
                         </div>
@@ -71,7 +73,7 @@
                 <div class="chat-input-container">
                     <form class="chat-input-form" id="chatForm">
                         <input type="text" class="chat-input" id="chatInput"
-                            placeholder="Ask about servers or applications..." autocomplete="off" />
+                            placeholder="Ask about clusters, nodes or resources..." autocomplete="off" />
                         <button type="submit" class="send-button" id="sendButton">
                             <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                                 <path d="M22 2L11 13" stroke="currentColor" stroke-width="2" stroke-linecap="round"
@@ -88,25 +90,28 @@
             <aside class="help-panel">
                 <h3>Quick Guide</h3>
                 <div class="help-section">
-                    <h4>🔍 Search by Server</h4>
-                    <p>Find all applications running on a specific server</p>
-                    <code>show me server-name</code>
+                    <h4>🖥️ List Clusters</h4>
+                    <p>See all clusters with status & health</p>
+                    <code>list all clusters</code>
                 </div>
                 <div class="help-section">
-                    <h4>📱 Search by Application</h4>
-                    <p>Find all servers running a specific application</p>
-                    <code>where is app-name running</code>
+                    <h4>🔍 Cluster Detail</h4>
+                    <p>Deep-dive into a specific cluster</p>
+                    <code>show cluster prod</code>
                 </div>
                 <div class="help-section">
-                    <h4>🌐 General Search</h4>
-                    <p>Search across all fields</p>
-                    <code>find production</code>
+                    <h4>⚙️ Node Status</h4>
+                    <p>See per-node health across all clusters</p>
+                    <code>node status</code>
                 </div>
                 <div class="help-section">
-                    <h4>📊 Data Management</h4>
-                    <p>Edit the Excel file at:</p>
-                    <code>data/servers.xlsx</code>
-                    <p class="note">Reload the page after making changes</p>
+                    <h4>📊 Resource Usage</h4>
+                    <p>Check CPU &amp; memory for a cluster</p>
+                    <code>CPU usage for staging</code>
+                </div>
+                <div class="help-section">
+                    <h4>⌨️ Shortcuts</h4>
+                    <p><kbd>/</kbd> Focus input &nbsp;|&nbsp; <kbd>Ctrl+K</kbd> Clear chat</p>
                 </div>
             </aside>
         </main>
