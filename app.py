@@ -1,180 +1,158 @@
 """
 Platform Engineering Chatbot - Flask Application
+Powered by Rancher API (Excel integration commented out)
 """
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, request, jsonify, render_template
 from flask_cors import CORS
-from excel_utils import excel_manager
+from rancher_utils import rancher_client
 from config import DEBUG, HOST, PORT
+
+# ── Excel imports commented out ───────────────────────────────────────────────
+# from excel_utils import excel_manager
+# ─────────────────────────────────────────────────────────────────────────────
+
 import re
 
 app = Flask(__name__)
 CORS(app)
 
 
-def parse_user_query(query):
-    """Parse user query to determine intent and extract keywords"""
-    query_lower = query.lower().strip()
-    
-    # Intent patterns
-    server_patterns = [
-        r'(?:server|node|host)\s+(\S+)',
-        r'on\s+(\S+)',
-        r'(\S+)\s+server',
-        r'show\s+(?:me\s+)?(\S+)',
-    ]
-    
-    app_patterns = [
-        r'application\s+(\S+)',
-        r'app\s+(\S+)',
-        r'(?:where|which).*?running\s+(\S+)',
-    ]
-    
-    # Check for server queries
-    for pattern in server_patterns:
-        match = re.search(pattern, query_lower)
-        if match and 'application' not in query_lower[:match.start()]:
-            return {
-                'intent': 'search_server',
-                'keyword': match.group(1)
-            }
-    
-    # Check for application queries
-    for pattern in app_patterns:
-        match = re.search(pattern, query_lower)
-        if match:
-            return {
-                'intent': 'search_application',
-                'keyword': match.group(1)
-            }
-    
-    # Default to general search
-    return {
-        'intent': 'search_all',
-        'keyword': query
-    }
+# ── Query Parsing ─────────────────────────────────────────────────────────────
 
+def parse_user_query(query):
+    """Parse user query to determine intent and extract keywords."""
+    q = query.lower().strip()
+
+    # ── list all clusters ─────────────────────────────────────────────────
+    if re.search(r'\b(list|show|get|all)\b.*\bclusters?\b', q) or q in ('clusters', 'all clusters'):
+        return {'intent': 'list_clusters', 'keyword': ''}
+
+    # ── cluster search by name ────────────────────────────────────────────
+    m = re.search(
+        r'(?:cluster|show me|details?(?:\s+of)?|status(?:\s+of)?)\s+([a-z0-9_\-\.]+)', q
+    )
+    if m:
+        return {'intent': 'cluster_detail', 'keyword': m.group(1)}
+
+    # ── node / node status queries ────────────────────────────────────────
+    if re.search(r'\bnodes?\b', q):
+        # specific node name after "node"
+        nm = re.search(r'\bnode\s+([a-z0-9_\-\.]+)', q)
+        if nm:
+            return {'intent': 'node_detail', 'keyword': nm.group(1)}
+        return {'intent': 'list_clusters', 'keyword': ''}   # show all with node info
+
+    # ── CPU / memory queries ──────────────────────────────────────────────
+    if re.search(r'\b(cpu|memory|mem|resources?|utilization|usage)\b', q):
+        cm = re.search(r'(?:cpu|memory|mem|resources?|usage).*?\b([a-z0-9_\-\.]{3,})\b', q)
+        if cm:
+            return {'intent': 'cluster_detail', 'keyword': cm.group(1)}
+        return {'intent': 'list_clusters', 'keyword': ''}
+
+    # ── generic keyword search ─────────────────────────────────────────────
+    return {'intent': 'search_cluster', 'keyword': query.strip()}
+
+
+# ── Response Formatting ───────────────────────────────────────────────────────
 
 def format_response(results, intent, keyword):
-    """Format search results into a natural language response"""
+    """Format Rancher API results into a chat response."""
     if not results:
-        return {
-            'message': f"I couldn't find any information about '{keyword}'. Please check the spelling or try a different query.",
-            'results': [],
-            'count': 0
-        }
-    
-    count = len(results)
-    
-    if intent == 'search_server':
-        clusters = [r.get('Cluster Name', 'N/A') for r in results]
-        message = f"Found {count} cluster(s) running on server '{keyword}':"
-    elif intent == 'search_application':
-        servers = [r.get('Server/Node Name', 'N/A') for r in results]
-        message = f"Cluster '{keyword}' is running on {count} server(s):"
-    else:
-        message = f"Found {count} matching record(s) for '{keyword}':"
-    
-    return {
-        'message': message,
-        'results': results,
-        'count': count
-    }
+        msg = (
+            f"I couldn't find any cluster matching '**{keyword}**'. "
+            "Try 'list all clusters' to see everything, or check the cluster name."
+        )
+        return {'message': msg, 'results': [], 'count': 0}
 
+    count = len(results)
+
+    if intent == 'list_clusters':
+        message = f"Here are all **{count}** cluster(s) in your Rancher environment:"
+    elif intent == 'cluster_detail':
+        message = f"Found **{count}** cluster(s) matching '**{keyword}**':"
+    elif intent == 'search_cluster':
+        message = f"Found **{count}** cluster(s) matching '**{keyword}**':"
+    else:
+        message = f"Found **{count}** result(s):"
+
+    return {'message': message, 'results': results, 'count': count}
+
+
+# ── Routes ────────────────────────────────────────────────────────────────────
 
 @app.route('/')
 def index():
-    """Render the chatbot interface"""
+    """Render the chatbot interface."""
     return render_template('index.html')
 
 
 @app.route('/api/chat', methods=['POST'])
 def chat():
-    """Handle chatbot queries"""
+    """Handle chatbot queries via Rancher API."""
     try:
         data = request.get_json()
         user_query = data.get('message', '').strip()
-        
+
         if not user_query:
-            return jsonify({
-                'error': 'Please enter a message'
-            }), 400
-        
-        # Parse the query
+            return jsonify({'error': 'Please enter a message'}), 400
+
         parsed = parse_user_query(user_query)
         intent = parsed['intent']
         keyword = parsed['keyword']
-        
-        # Execute search based on intent
-        if intent == 'search_server':
-            results = excel_manager.search_by_server(keyword)
-        elif intent == 'search_application':
-            results = excel_manager.search_by_application(keyword)
+
+        # ── Dispatch to Rancher ───────────────────────────────────────────
+        if intent == 'list_clusters':
+            results = rancher_client.get_cluster_summary()
+        elif intent in ('cluster_detail', 'search_cluster'):
+            if keyword:
+                results = rancher_client.get_cluster_summary(cluster_name=keyword)
+            else:
+                results = rancher_client.get_cluster_summary()
+        elif intent == 'node_detail':
+            # Search all clusters and filter nodes by name
+            all_summaries = rancher_client.get_cluster_summary()
+            results = []
+            kw_lower = keyword.lower()
+            for s in all_summaries:
+                matching_nodes = [
+                    n for n in s.get('nodes', [])
+                    if kw_lower in n['name'].lower()
+                ]
+                if matching_nodes:
+                    results.append({**s, 'nodes': matching_nodes})
         else:
-            results = excel_manager.search_all(keyword)
-        
-        # Format response
+            results = rancher_client.get_cluster_summary(cluster_name=keyword)
+
         response = format_response(results, intent, keyword)
-        
         return jsonify(response)
-    
+
+    except RuntimeError as e:
+        return jsonify({'error': str(e)}), 503
     except Exception as e:
-        return jsonify({
-            'error': f'An error occurred: {str(e)}'
-        }), 500
+        return jsonify({'error': f'An error occurred: {str(e)}'}), 500
 
 
 @app.route('/api/stats', methods=['GET'])
 def get_stats():
-    """Get database statistics"""
+    """Return aggregate cluster and node statistics from Rancher."""
     try:
-        stats = excel_manager.get_statistics()
+        stats = rancher_client.get_statistics()
         return jsonify(stats)
     except Exception as e:
-        return jsonify({
-            'error': f'Error fetching statistics: {str(e)}'
-        }), 500
+        return jsonify({'error': f'Error fetching statistics: {str(e)}'}), 500
 
 
-@app.route('/api/add', methods=['POST'])
-def add_record():
-    """Add a new server/application record"""
-    try:
-        data = request.get_json()
-        
-        server_name = data.get('server_name', '')
-        application = data.get('application', '')
-        environment = data.get('environment', '')
-        run_as = data.get('run_as', '')
-        notes = data.get('notes', '')
-        
-        if not server_name or not application:
-            return jsonify({
-                'error': 'Server name and application name are required'
-            }), 400
-        
-        success = excel_manager.add_record(
-            server_name, application, environment, run_as, notes
-        )
-        
-        if success:
-            return jsonify({
-                'message': 'Record added successfully',
-                'success': True
-            })
-        else:
-            return jsonify({
-                'error': 'Failed to add record'
-            }), 500
-    
-    except Exception as e:
-        return jsonify({
-            'error': f'An error occurred: {str(e)}'
-        }), 500
+# ── Excel add-record endpoint commented out ───────────────────────────────────
+# @app.route('/api/add', methods=['POST'])
+# def add_record():
+#     """Add a new server/application record (Excel-based, disabled)."""
+#     pass
+# ─────────────────────────────────────────────────────────────────────────────
 
 
 if __name__ == '__main__':
     print("=" * 60)
-    print("Platform Engineering Chatbot Starting...")
+    print("GBME Platform Assistant – Rancher API mode")
     print(f"Access the chatbot at: http://localhost:{PORT}")
     print("=" * 60)
     app.run(debug=DEBUG, host=HOST, port=PORT)
